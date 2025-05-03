@@ -91,6 +91,7 @@ struct ECSArchetypeData
 		{
 			if (ComponentMask.test(i))
 			{
+				ComponentOffsets[i] = ChunkSize;
 				ChunkSize += ECSComponentSize[i];
 			}
 		}
