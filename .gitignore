@@ -1,0 +1,16 @@
+# Xmake generated files
+build/
+*.xmake/
+xmake.lua.bak
+vsxmake*/
+
+# Temporary files
+*.tmp
+*.log
+*.bak
+*.swp
+*.swo
+
+# System files
+.DS_Store
+Thumbs.db
