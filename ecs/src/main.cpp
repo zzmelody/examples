@@ -1,4 +1,5 @@
 #include <bitset>
+#include <cassert>
 #include <iostream>
 #include <map>
 #include <unordered_map>
@@ -103,7 +104,7 @@ struct ECSArchetypeData
 	template<typename CompType>
 	CompType* GetComponent(Entity entity)
 	{
-		return (CompType*)(MemChunk + EntityOffsets[entity] + ComponentOffsets[CompType::GetTypeId()]);
+		return (CompType*)(MemChunk + EntityOffsets[entity] * ChunkSize + ComponentOffsets[CompType::GetTypeId()]);
 	}
 
 	void AddEntity(Entity entity)
@@ -112,6 +113,13 @@ struct ECSArchetypeData
 		// 直接在当前空位添加一个Entity
 		EntityOffsets[entity] = NextValidIndex;
 		NextValidIndex++;
+		if(NextValidIndex * ChunkSize >= 64*1024)
+		{
+			std::cout << "Chunk Size is not enough, need to expand" << std::endl;
+			// 这里需要扩容了
+			// 这里需要考虑内存回收的问题，不过演示版本就简化不考虑了
+			assert(false);
+		}		
 	}
 
 	
@@ -133,11 +141,15 @@ public:
 		{
 			archetypes[ComponentMask] = ECSArchetypeData(ComponentMask);
 		}
+		auto* archetypeData = &archetypes[ComponentMask];
+
 
 		// 这里需要考虑Index回收的问题，不过演示版本就简化不考虑了
 		auto ret = ++entityIndex;
-		entities[ret] = &archetypes[ComponentMask];
-
+	
+		entities[ret] = archetypeData;
+		archetypeData->AddEntity(ret);
+		
 		return ret;
 	}
 
@@ -245,6 +257,11 @@ int main()
 
 	entMgr.GetEntityArchetype(entId)->GetComponent<ECSHelloComponent>(entId)->helloIndex = 1;
 	entMgr.GetEntityArchetype(entId)->GetComponent<ECSDataComponent>(entId)->index = 2;
+
+	auto entId2 = entMgr.CreateEntity(archType2);
+
+	entMgr.GetEntityArchetype(entId2)->GetComponent<ECSHelloComponent>(entId2)->helloIndex = 1000;
+	entMgr.GetEntityArchetype(entId2)->GetComponent<ECSDataComponent>(entId2)->index = 2000;
 
 	while (not requestExit)
 	{ 
