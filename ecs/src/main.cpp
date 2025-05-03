@@ -262,6 +262,9 @@ int main()
 
 	entMgr.GetEntityArchetype(entId2)->GetComponent<ECSHelloComponent>(entId2)->helloIndex = 1000;
 	entMgr.GetEntityArchetype(entId2)->GetComponent<ECSDataComponent>(entId2)->index = 2000;
+	
+	std::signal(SIGINT, signal_handler);  // ctrl + c
+	std::signal(SIGTERM, signal_handler);  
 
 	while (not requestExit)
 	{ 
